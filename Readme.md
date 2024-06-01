@@ -47,6 +47,7 @@ For an example of how to use the Raman Spectra Analyzer, please refer to the exa
 To use your own data parse it and create a dataframe or list of dataframes. Each dataframe should have colums: Intensity and Wavenumber.
 load_asc_file(filename): Load a .asc file and convert it to a pandas DataFrame.  
 load_data_from_directory(directory, prefix): Load multiple .asc files from a directory and create a list of DataFrames.  
+
 ## Synthetic Spectra Generation
 generate_random_raman_spectra(...): Generate random Raman spectra with Lorentzian peaks, polynomial baseline, Gaussian noise, and random spikes.  
 
@@ -62,6 +63,10 @@ smooth_spectra(df, window_length=11, polyorder=2, plot=False): Smooth the Raman 
 
 ## Peak Fitting
 fit_lorentzians(df, n_peaks_to_find=5, title='', threshold=0.25, min_dist=7, peak_method='scipy', reduce_data_points=None, fixed_centers=True, remove_peaks_ranges=None, add_peaks=None): Fit Lorentzians to the Raman spectra.  
+
+Below is an example of the fitting results:  
+
+![Fitting Results](./fit.png)
 
 ## Plotting
 plot_raman_spectra(df, title="Raman spectra"): Plot the Raman spectra.  

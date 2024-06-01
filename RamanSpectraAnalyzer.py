@@ -42,9 +42,9 @@ def generate_random_raman_spectra(wavenumber_range=(100, 3500), n_points=1000, n
     
     Parameters:
     wavenumber_range (tuple): The range of wavenumber values (start, end).
-    n_points (int): The number of data points in the spectrum.
-    n_peaks (int): The number of peaks in the spectrum.
-    noise_level (float): The level of Gaussian noise to add to the spectrum.
+    n_points (int): The number of data points in the spectra.
+    n_peaks (int): The number of peaks in the spectra.
+    noise_level (float): The level of Gaussian noise to add to the spectra.
     peak_positions (list): Specific positions for the peaks. If None, random positions are generated.
     peak_amplitude_range (tuple): The range (min, max) for peak amplitudes.
     peak_width_range (tuple): The range (min, max) for peak widths.
@@ -64,8 +64,8 @@ def generate_random_raman_spectra(wavenumber_range=(100, 3500), n_points=1000, n
     # Generate wavenumber values
     wavenumbers = np.linspace(wavenumber_range[0], wavenumber_range[1], n_points)
     
-    # Initialize the spectrum with zeros
-    spectrum = np.zeros_like(wavenumbers)
+    # Initialize the spectra with zeros
+    spectra = np.zeros_like(wavenumbers)
     
     # Generate random peak positions, amplitudes, and widths if not provided
     if peak_positions is None:
@@ -73,49 +73,49 @@ def generate_random_raman_spectra(wavenumber_range=(100, 3500), n_points=1000, n
     peak_amplitudes = np.random.uniform(peak_amplitude_range[0], peak_amplitude_range[1], n_peaks)
     peak_widths = np.random.uniform(peak_width_range[0], peak_width_range[1], n_peaks)
     
-    # Add Lorentzian peaks to the spectrum
+    # Add Lorentzian peaks to the spectra
     for pos, amp, wid in zip(peak_positions, peak_amplitudes, peak_widths):
-        spectrum += lorentzian(wavenumbers, amp, pos, wid)
+        spectra += lorentzian(wavenumbers, amp, pos, wid)
     
     # Generate a polynomial baseline with scaled coefficients
     baseline_coeffs = np.random.uniform(-1, 1, baseline_degree + 1) * baseline_scale
     baseline = np.polyval(baseline_coeffs, wavenumbers)
-    spectrum += baseline
+    spectra += baseline
     
     spectra_list = []
     
     for _ in range(n_spectra):
-        # Copy the common spectrum (baseline + peaks)
-        spectrum_with_noise_and_spikes = spectrum.copy()
+        # Copy the common spectra (baseline + peaks)
+        spectra_with_noise_and_spikes = spectra.copy()
         
-        # Add Gaussian noise to the spectrum
+        # Add Gaussian noise to the spectra
         noise = np.random.normal(0, noise_level, n_points)
-        spectrum_with_noise_and_spikes += noise
+        spectra_with_noise_and_spikes += noise
         
-        # Add random spikes to the spectrum
+        # Add random spikes to the spectra
         spikes = np.random.choice([0, 1], size=n_points, p=[1 - spike_prob, spike_prob])
         spike_magnitudes = np.random.uniform(5, 20, n_points) * spikes
-        spectrum_with_noise_and_spikes += spike_magnitudes
+        spectra_with_noise_and_spikes += spike_magnitudes
         
-        # Create a DataFrame with the generated spectrum
-        df_spectrum = pd.DataFrame({'Wavenumber': wavenumbers, 'Intensity': spectrum_with_noise_and_spikes})
-        spectra_list.append(df_spectrum)
+        # Create a DataFrame with the generated spectra
+        df_spectra = pd.DataFrame({'Wavenumber': wavenumbers, 'Intensity': spectra_with_noise_and_spikes})
+        spectra_list.append(df_spectra)
         
-        # Plot the generated spectrum if requested
+        # Plot the generated spectra if requested
         if plot:
             plt.figure(figsize=(10, 6))
-            plt.plot(wavenumbers, spectrum_with_noise_and_spikes, label=f'Generated Spectrum {_+1}')
+            plt.plot(wavenumbers, spectra_with_noise_and_spikes, label=f'Generated spectra {_+1}')
             plt.plot(wavenumbers, baseline, label='Polynomial Baseline', linestyle='--')
             plt.xlabel('Wavenumber (cm$^{-1}$)')
             plt.ylabel('Intensity (a.u.)')
-            plt.title('Randomly Generated Raman Spectrum')
+            plt.title('Randomly Generated Raman spectra')
             plt.legend()
             plt.grid(True)
             plt.show()
     
     return spectra_list
 
-def average_spectra(dataframes, plot=False):
+def average_spectrum(dataframes, plot=False):
     """Average a list of DataFrames, ensuring they have the same length and Wavenumber values."""
     min_wavenumber = max(df['Wavenumber'].min() for df in dataframes)
     max_wavenumber = min(df['Wavenumber'].max() for df in dataframes)
@@ -129,7 +129,7 @@ def average_spectra(dataframes, plot=False):
         plt.plot(averaged_df['Wavenumber'], averaged_df['Intensity'], color='black', linewidth=2, label='Averaged')
         plt.xlabel('Wavenumber')
         plt.ylabel('Intensity')
-        plt.title('Averaged Raman Spectrum')
+        plt.title('Averaged Raman spectra')
         plt.legend()
         plt.show()
     return averaged_df
@@ -144,8 +144,8 @@ def cut_spectra(df, start=None, end=None):
     return df.loc[mask].reset_index(drop=True)
 
 # Plotting Functions
-def plot_raman_spectrum(df, title="Raman Spectrum"):
-    """Plot the Raman spectrum."""
+def plot_raman_spectra(df, title="Raman spectra"):
+    """Plot the Raman spectra."""
     plt.figure(figsize=(10, 6))
     plt.plot(df['Wavenumber'], df['Intensity'])
     plt.xlabel('Wavenumber')
@@ -156,7 +156,7 @@ def plot_raman_spectrum(df, title="Raman Spectrum"):
 
 # Background Removal
 def remove_background(df_sample, df_background):
-    """Remove background from the Raman spectrum, ensuring same length and Wavenumber values."""
+    """Remove background from the Raman spectra, ensuring same length and Wavenumber values."""
     common_range = np.intersect1d(df_sample['Wavenumber'], df_background['Wavenumber'])
     df_sample = df_sample[df_sample['Wavenumber'].isin(common_range)].sort_values('Wavenumber')
     df_background = df_background[df_background['Wavenumber'].isin(common_range)].sort_values('Wavenumber')
@@ -164,8 +164,8 @@ def remove_background(df_sample, df_background):
     return df_sample
 
 # Normalization
-def normalize_spectrum(df, range_min, range_max):
-    """Normalize the Raman spectrum to the specified range."""
+def normalize_spectra(df, range_min, range_max):
+    """Normalize the Raman spectra to the specified range."""
     df_copy = df.copy()
     mask = (df_copy['Wavenumber'] >= range_min) & (df_copy['Wavenumber'] <= range_max)
     df_copy['Intensity'] = df_copy['Intensity'] * 1000000 / df_copy.loc[mask, 'Intensity'].sum()
@@ -173,14 +173,14 @@ def normalize_spectrum(df, range_min, range_max):
 
 # Shift to Zero
 def shift_intensity_to_zero(df):
-    """Shift the spectrum intensity to start from zero."""
+    """Shift the spectra intensity to start from zero."""
     df_copy = df.copy()
     df_copy['Intensity'] = df['Intensity'] - df['Intensity'].min()
     return df_copy
 
-# Despiking Spectrum
-def despike_spectrum(df, moving_average, threshold=7, plot=False):
-    """Remove spikes from the Raman spectrum using modified Z-score."""
+# Despiking spectra
+def despike_spectra(df, moving_average, threshold=7, plot=False):
+    """Remove spikes from the Raman spectra using modified Z-score."""
     def modified_z_score(y_values):
         y_diff = np.diff(y_values)
         median_y = np.median(y_diff)
@@ -203,7 +203,7 @@ def despike_spectrum(df, moving_average, threshold=7, plot=False):
         plt.plot(wavelength, despiked, label='Despiked Data')
         plt.xlabel('Wavelength (nm)')
         plt.ylabel('Intensity (a.u.)')
-        plt.title('Despiked Spectrum')
+        plt.title('Despiked spectra')
         plt.legend()
         plt.grid(True)
         plt.show()
@@ -230,7 +230,7 @@ def despike_spectrum(df, moving_average, threshold=7, plot=False):
 
 # Baseline Estimation
 def estimate_baseline(df, lam=10000000, p=0.05, niter=3, plot=False):
-    """Estimate and subtract the baseline from the Raman spectrum."""
+    """Estimate and subtract the baseline from the Raman spectra."""
     def baseline_als(y, lam, p, niter):
         L = len(y)
         D = sparse.diags([1, -2, 1], [0, -1, -2], shape=(L, L - 2))
@@ -265,16 +265,16 @@ def estimate_baseline(df, lam=10000000, p=0.05, niter=3, plot=False):
         plt.plot(df['Wavenumber'], baselined_counts, label='Baselined Data')
         plt.xlabel('Wavenumber')
         plt.ylabel('Intensity')
-        plt.title('Baselined Spectrum')
+        plt.title('Baselined spectra')
         plt.legend()
         plt.grid(True)
         plt.show()
 
     return df_baselined
 
-# Smoothing Spectrum
-def smooth_spectrum(df, window_length=11, polyorder=2, plot=False):
-    """Smooth the Raman spectrum using Savitzky-Golay filter."""
+# Smoothing spectra
+def smooth_spectra(df, window_length=11, polyorder=2, plot=False):
+    """Smooth the Raman spectra using Savitzky-Golay filter."""
     smoothed_counts = savgol_filter(df['Intensity'], window_length=window_length, polyorder=polyorder)
 
     df_smoothed = df.copy()
@@ -286,7 +286,7 @@ def smooth_spectrum(df, window_length=11, polyorder=2, plot=False):
         plt.plot(df['Wavenumber'], smoothed_counts, label='Smoothed Data')
         plt.xlabel('Wavenumber')
         plt.ylabel('Intensity')
-        plt.title('Smoothed Spectrum')
+        plt.title('Smoothed spectra')
         plt.legend()
         plt.grid(True)
         plt.show()
@@ -294,7 +294,7 @@ def smooth_spectrum(df, window_length=11, polyorder=2, plot=False):
     return df_smoothed
 
 def fit_lorentzians(df, n_peaks_to_find=5, title='', threshold=0.25, min_dist=7, peak_method='scipy', reduce_data_points=None, fixed_centers=True, remove_peaks_ranges=None, add_peaks=None):
-    """Fit Lorentzians to the Raman spectrum."""
+    """Fit Lorentzians to the Raman spectra."""
 
     def lorentzian(x, amp, ctr, wid):
         return amp * wid ** 2 / ((x - ctr) ** 2 + wid ** 2)

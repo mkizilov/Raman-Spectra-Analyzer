@@ -39,6 +39,8 @@ def create_dataframe_list(directory, file_startswith):
 
 def average_dataframes(dataframe_list):
     """Average the list of DataFrames."""
+    
+    #
     df = pd.concat(dataframe_list).groupby(level=0).mean()
     return df
 
